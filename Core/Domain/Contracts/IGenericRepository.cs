@@ -13,6 +13,8 @@ namespace Domain.Contracts
         void Update(TEntity entity);
         void Delete(TEntity entity);
         Task<IEnumerable<TEntity>> GetAllAsync();
-        Task<TEntity> GetByIdAsync(TKey id);
+        Task<TEntity?> GetByIdAsync(TKey id);
+        Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TEntity> specifications);
+        Task<TEntity> GetByIdAsync(ISpecifications<TEntity> specifications);
     }
 }
