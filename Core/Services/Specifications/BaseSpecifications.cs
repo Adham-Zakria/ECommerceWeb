@@ -18,9 +18,35 @@ namespace Services.Specifications
 
         public List<Expression<Func<T, object>>> IncludeExpressions { get; } = []; // Loading nav prop
 
+        public Expression<Func<T, object>> OrderBy { get; private set; }
+
+        public Expression<Func<T, object>> OrderByDesc { get; private set; }
+
+        public int Skip { get; private set; }
+
+        public int Take { get; private set; }
+
+        public bool IsPaginated { get; private set; }
+
         protected void AddInclude(Expression<Func<T, object>> include)
         {
             IncludeExpressions.Add(include);
-        } 
+        }
+
+        protected void AddOrderBy(Expression<Func<T, object>> orderBy)
+        {
+            OrderBy = orderBy;
+        }
+        protected void AddOrderByDesc(Expression<Func<T, object>> orderByDesc)
+        {
+            OrderByDesc = orderByDesc;
+        }
+
+        protected void ApplyPagination(int pageSize,int pageIndex)
+        {
+            IsPaginated = true;
+            Take = pageSize;
+            Skip = (pageIndex - 1) * pageSize;
+        }
     }
 }

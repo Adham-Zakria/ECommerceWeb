@@ -3,7 +3,9 @@ using Domain.Contracts;
 using Domain.Models;
 using Services.Specifications;
 using ServicesAbstraction;
+using Shared;
 using Shared.DataTransferObjects.Products;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +16,31 @@ namespace Services
 {
     public class ProductService(IUnitOfWork _unitOfWork , IMapper _mapper) : IProductService
     {
-        public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync()
-        {
-            var specs = new ProductWithTypeAndBrandSpecifications(); 
+        //public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync(ProductQueryParameters productQueryParameters)
+        //{
+        //    var specs = new ProductWithTypeAndBrandSpecifications(productQueryParameters); 
 
-            var Repository =_unitOfWork.GetRepository<Product,int>();
-            var products=await Repository.GetAllAsync(specs);
+        //    var Repository =_unitOfWork.GetRepository<Product,int>();
+        //    var products=await Repository.GetAllAsync(specs);
+        //    //mapping from IEnumerable<Product> to IEnumerable<ProductResponse>
+        //    var result =_mapper.Map<IEnumerable<ProductResponse>>(products);
+        //    return result;
+        //}                     // old one
+        public async Task<PaginatedResponse<ProductResponse>> GetAllProductsAsync(ProductQueryParameters productQueryParameters)
+        {
+            var specs = new ProductWithTypeAndBrandSpecifications(productQueryParameters);
+
+            var Repository = _unitOfWork.GetRepository<Product, int>();
+            var products = await Repository.GetAllAsync(specs);
             //mapping from IEnumerable<Product> to IEnumerable<ProductResponse>
-            var result =_mapper.Map<IEnumerable<ProductResponse>>(products);
+            var productsResult = _mapper.Map<IEnumerable<ProductResponse>>(products);
+            var result = new PaginatedResponse<ProductResponse>()
+            {
+                Data = productsResult,
+                PageIndex = productQueryParameters.PageIndex,
+                PageSize = productQueryParameters.PageSize,
+                TotalCount = productsResult.Count()
+            };
             return result;
         }
         public async Task<IEnumerable<BrandResponse>> GetAllBrandsAsync()

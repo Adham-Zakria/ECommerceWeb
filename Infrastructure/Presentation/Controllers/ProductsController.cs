@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ServicesAbstraction;
+using Shared;
 using Shared.DataTransferObjects.Products;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +16,17 @@ namespace Presentation.Controllers
     public class ProductsController(IServiceManager _serviceManager) : ControllerBase
     {
         // Get all products
+        //[HttpGet] 
+        //public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts([FromQuery]ProductQueryParameters productQueryParameters) 
+        //{
+        //    var products = await _serviceManager.ProductService.GetAllProductsAsync(productQueryParameters);
+        //    return Ok(products);
+        //}    // old one
+
         [HttpGet] //Get //BaseUrl/api/products
-        public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts() 
+        public async Task<ActionResult<PaginatedResponse<ProductResponse>>> GetAllProducts([FromQuery]ProductQueryParameters productQueryParameters) 
         {
-            var products = await _serviceManager.ProductService.GetAllProductsAsync();
+            var products = await _serviceManager.ProductService.GetAllProductsAsync(productQueryParameters);
             return Ok(products);
         }
 

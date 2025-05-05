@@ -14,8 +14,13 @@ namespace Domain.Contracts
         Expression<Func<T, bool>> Criteria { get; }   // for filtering
 
         //Include
+        //_storeDbContext.Set<T>().Where(Specifications.Criteria).Include(IncludeExpressions[0])
         List<Expression<Func<T, Object>>> IncludeExpressions { get; }    //for eager loading
 
-        //_storeDbContext.Set<T>().Where(Specifications.Criteria).Include(IncludeExpressions[0])
+        Expression<Func<T, Object>> OrderBy { get; } // for order Asc
+        Expression<Func<T, Object>> OrderByDesc { get; } // for order Desc
+        int Skip { get; }
+        int Take { get; }
+        bool IsPaginated { get; }
     }
 }
