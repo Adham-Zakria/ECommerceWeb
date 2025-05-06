@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
-using Domain.Models;
+using Domain.Exceptions;
+using Domain.Models.Products;
 using Services.Specifications;
 using ServicesAbstraction;
 using Shared;
@@ -34,12 +35,16 @@ namespace Services
             var products = await Repository.GetAllAsync(specs);
             //mapping from IEnumerable<Product> to IEnumerable<ProductResponse>
             var productsResult = _mapper.Map<IEnumerable<ProductResponse>>(products);
+
+            var countSpecs = new ProductCountSpecifications(productQueryParameters);
+            var productsCount = await _unitOfWork.GetRepository<Product, int>().CountAsync(countSpecs);
+
             var result = new PaginatedResponse<ProductResponse>()
             {
                 Data = productsResult,
                 PageIndex = productQueryParameters.PageIndex,
                 PageSize = productQueryParameters.PageSize,
-                TotalCount = productsResult.Count()
+                TotalCount = productsCount
             };
             return result;
         }
@@ -64,7 +69,8 @@ namespace Services
         {
             var specs=new ProductWithTypeAndBrandSpecifications(id);
 
-            var product = await _unitOfWork.GetRepository<Product, int>().GetByIdAsync(specs);
+            var product = await _unitOfWork.GetRepository<Product, int>().GetByIdAsync(specs)
+                ?? throw (new ProductNotFoundException(id));
             //mapping from Product to ProductResponse
             return _mapper.Map<ProductResponse>(product);
         }

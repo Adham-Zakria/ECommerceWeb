@@ -1,5 +1,5 @@
 ﻿using Domain.Contracts;
-using Domain.Models;
+using Domain.Models.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Persistence.Data;
