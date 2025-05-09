@@ -1,28 +1,35 @@
 ﻿using Domain.Contracts;
 using Domain.Models.Baskets;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
-    public class BasketRepository : IBasketRepository
+    public class BasketRepository(IConnectionMultiplexer _connection) : IBasketRepository
     {
-        public Task<CustomerBasket> CreateOrUpdateAsync(CustomerBasket basket)
+        private readonly IDatabase _database=_connection.GetDatabase();
+
+        public async Task<CustomerBasket?> GetAsync(string id)
         {
-            throw new NotImplementedException();
+            var basket = await _database.StringGetAsync(id);
+            if(basket.IsNullOrEmpty) return null;
+            return JsonSerializer.Deserialize<CustomerBasket>(basket!);
+        }
+        public async Task<CustomerBasket?> CreateOrUpdateAsync(CustomerBasket basket , TimeSpan? timeToLive = null)
+        {
+            var jsonBasket = JsonSerializer.Serialize(basket);
+            var isCreatedOrUpdated = await _database.StringSetAsync(basket.Id, jsonBasket , timeToLive ?? TimeSpan.FromDays(7)); // to store in database
+            return  isCreatedOrUpdated ? await GetAsync(basket.Id) : null;
         }
 
-        public Task DeleteAsync(string id)
+        public async Task DeleteAsync(string id)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<CustomerBasket?> GetAsync(string id)
-        {
-            throw new NotImplementedException();
+            await _database.KeyDeleteAsync(id);
         }
     }
 }
