@@ -1,5 +1,7 @@
 ﻿using Domain.Contracts;
+using Domain.Models.Identity;
 using Domain.Models.Products;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Persistence.Data;
@@ -12,7 +14,8 @@ using System.Threading.Tasks;
 
 namespace Persistence
 {
-    public class DbInitializer(StoreDbContext _storeDbContext) : IDbInitializer
+    public class DbInitializer(StoreDbContext _storeDbContext ,
+        UserManager<ApplicationUser> _userManager , RoleManager<IdentityRole> _roleManager) : IDbInitializer
     {
         public async Task InitializeAsync()
         {
@@ -59,6 +62,50 @@ namespace Persistence
                 }
             }
             catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task InitializeIdentityAsync()
+        {
+            // in deployment
+            //if ((await _storeDbContext.Database.GetPendingMigrationsAsync()).Any())
+            //{
+            //    await _storeDbContext.Database.MigrateAsync();  // if you find migrations applay it 
+            //}
+
+            //in development
+            try
+            {
+                if (!_roleManager.Roles.Any())
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                    await _roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+                }
+
+                if (!_userManager.Users.Any())
+                {
+                    var superAdminUser = new ApplicationUser()
+                    {
+                        DisplayName = "Super Admin",
+                        UserName = "superadmin",
+                        Email = "superadmin@gmail.com"
+                    };
+                    var adminUser = new ApplicationUser()
+                    {
+                        DisplayName = "Admin",
+                        UserName = "admin",
+                        Email = "admin@gmail.com"
+                    };
+                    await _userManager.CreateAsync(superAdminUser,"P@ssw0rd");
+                    await _userManager.CreateAsync(adminUser,"password"); // add the user and his password
+
+                    await _userManager.AddToRoleAsync(superAdminUser,"SuperAdmin");
+                    await _userManager.AddToRoleAsync(adminUser,"Admin");
+                }                
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }

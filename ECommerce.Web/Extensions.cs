@@ -19,11 +19,13 @@ namespace ECommerce.Web
             return services;
         }
 
-        public static async Task InitializeDb(this WebApplication app)
+        public static async Task<WebApplication> InitializeDb(this WebApplication app)
         {
             using var scope = app.Services.CreateScope();
             var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
             await dbInitializer.InitializeAsync();
+            await dbInitializer.InitializeIdentityAsync();
+            return app;
         }
     }
 }
