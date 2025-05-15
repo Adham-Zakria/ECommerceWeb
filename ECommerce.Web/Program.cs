@@ -27,7 +27,7 @@ namespace ECommerce.Web
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             //builder.Services.AddEndpointsApiExplorer();
             //builder.Services.AddSwaggerGen();
-            builder.Services.AddWebApplicationService();
+            builder.Services.AddWebApplicationService(builder.Configuration);
             //builder.Services.AddDbContext<StoreDbContext>(options =>
             //{
             //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -37,7 +37,7 @@ namespace ECommerce.Web
             //builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
             //builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddInfrastructureRegisteration(builder.Configuration);
-            builder.Services.AddApplicationService();
+            builder.Services.AddApplicationService(builder.Configuration);
             //builder.Services.Configure<ApiBehaviorOptions>(options =>
             //{
             //    // Func<ActionContext, out IActionResult>
@@ -71,6 +71,7 @@ namespace ECommerce.Web
             app.UseStaticFiles();
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers(); 

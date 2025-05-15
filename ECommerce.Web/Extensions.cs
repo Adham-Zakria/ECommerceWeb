@@ -1,12 +1,18 @@
 ﻿using Domain.Contracts;
 using ECommerce.Web.Factories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Shared.DataTransferObjects.Authentication;
+using System.Collections;
+using System.Text;
 
 namespace ECommerce.Web
 {
     public static class Extensions
     {
-        public static IServiceCollection AddWebApplicationService(this IServiceCollection services)
+        public static IServiceCollection AddWebApplicationService
+            (this IServiceCollection services , IConfiguration configuration)
         {
             services.AddControllers();
             services.AddEndpointsApiExplorer();
@@ -16,6 +22,7 @@ namespace ECommerce.Web
                 // Func<ActionContext, out IActionResult>
                 options.InvalidModelStateResponseFactory = ApiResponseFactory.GenerateApiValidationResponse;
             });
+            services.ConfigureJWT(configuration);
             return services;
         }
 
@@ -26,6 +33,28 @@ namespace ECommerce.Web
             await dbInitializer.InitializeAsync();
             await dbInitializer.InitializeIdentityAsync();
             return app;
+        }
+
+        private static void ConfigureJWT(this IServiceCollection services ,IConfiguration configuration)
+        {
+            var jwt = configuration.GetSection("JWTOptions").Get<JWTOptions>();
+            services.AddAuthentication(config =>
+            {
+                config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                config.DefaultChallengeScheme=JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(config =>
+            {
+                config.TokenValidationParameters = new TokenValidationParameters() 
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwt.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwt.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SecretKey))
+                };
+            });
         }
     }
 }

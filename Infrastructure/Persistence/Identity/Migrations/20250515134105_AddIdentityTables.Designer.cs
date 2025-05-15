@@ -12,7 +12,7 @@ using Persistence.Identity;
 namespace Persistence.Identity.Migrations
 {
     [DbContext(typeof(StoreIdentityDbContext))]
-    [Migration("20250513141109_AddIdentityTables")]
+    [Migration("20250515134105_AddIdentityTables")]
     partial class AddIdentityTables
     {
         /// <inheritdoc />
@@ -27,8 +27,11 @@ namespace Persistence.Identity.Migrations
 
             modelBuilder.Entity("Domain.Models.Identity.Address", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
                         .IsRequired()

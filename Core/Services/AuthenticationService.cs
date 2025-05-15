@@ -1,17 +1,23 @@
 ﻿using Domain.Exceptions;
 using Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic.FileIO;
 using ServicesAbstraction;
 using Shared.DataTransferObjects.Authentication;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Services
 {
-    public class AuthenticationService(UserManager<ApplicationUser> _userManager) : IAuthenticationService
+    public class AuthenticationService(UserManager<ApplicationUser> _userManager ,
+        IOptions<JWTOptions> _jwtOptions) : IAuthenticationService
     {
         public async Task<UserResponse> LoginAsync(LoginRequest loginRequest)
         {
@@ -27,7 +33,7 @@ namespace Services
                 {
                     Email = user.Email,
                     DisplayName = user.DisplayName,
-                    Token = "JWTToken" //3.generate token
+                    Token = await GenerateToken(user) //3.generate token
                 };
             }
 
@@ -50,11 +56,42 @@ namespace Services
                 {
                     Email=user.Email,
                     DisplayName = user.DisplayName,
-                    Token = "JWTToken" //generate token
+                    Token = await GenerateToken(user) //generate token
                 };
             }
             var errors=createdUser.Errors.Select(e=>e.Description).ToList();
             throw new BadRequestException(errors);
+        }
+
+        private async Task<string> GenerateToken(ApplicationUser user)
+        {
+            var jwtOpt = _jwtOptions.Value;
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Email, user.Email!),
+                new Claim(ClaimTypes.Name, user.UserName!),
+            };
+            var roles= await _userManager.GetRolesAsync(user);
+
+            foreach (var role in roles) 
+                claims.Add(new Claim(ClaimTypes.Role, role));
+
+            string secretKey = jwtOpt.SecretKey;   
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
+            var credentials = new SigningCredentials(key,SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: jwtOpt.Issuer,//
+                audience: jwtOpt.Audience,//
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(jwtOpt.DurationInDays),
+                signingCredentials: credentials
+                );
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.WriteToken(token);
+
         }
     }
 }
