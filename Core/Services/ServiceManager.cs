@@ -25,7 +25,7 @@ namespace Services
             new Lazy<IBasketService>(() => new BasketService(_basketRepository, _mapper));
 
         private readonly Lazy<IAuthenticationService> _lazyAuthenticationService =
-            new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _jwtOptions));
+            new Lazy<IAuthenticationService>(() => new AuthenticationService(_userManager, _jwtOptions , _mapper));
 
         public IProductService ProductService => _lazyProductService.Value;
 
