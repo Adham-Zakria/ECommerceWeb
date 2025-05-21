@@ -27,7 +27,6 @@ namespace Presentation.Controllers
             return Ok(await _serviceManager.AuthenticationService.RegisterAsync(registerRequest));
         }
 
-        [Authorize]
         [HttpGet("CheckEmail")]
         public async Task<ActionResult<bool>> CheckEmail(string email)
         {

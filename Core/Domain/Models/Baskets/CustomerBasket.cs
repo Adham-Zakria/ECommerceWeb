@@ -10,5 +10,9 @@ namespace Domain.Models.Baskets
     {
         public string Id { get; set; } // Guid : generated from the client side
         public IEnumerable<BasketItem> Items { get; set; }
+        public string? ClientSecret { get; set; }
+        public string? PaymentIntentId { get; set; }
+        public int DeliveryMethodId { get; set; }
+        public decimal ShippingPrice { get; set; }
     }
 }

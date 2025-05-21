@@ -43,6 +43,15 @@ namespace ECommerce.Web
             //    // Func<ActionContext, out IActionResult>
             //    options.InvalidModelStateResponseFactory = ApiResponseFactory.GenerateApiValidationResponse;
             //});
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyHeader();
+                    builder.AllowAnyMethod();
+                });
+            });
             #endregion
 
             var app = builder.Build();
@@ -66,10 +75,17 @@ namespace ECommerce.Web
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(options =>
+                {
+                    options.DocumentTitle = "Ecommerce App";
+                    options.EnableFilter(); // search by the controller's name
+                    options.DisplayRequestDuration();
+                });
             }
             app.UseStaticFiles();
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowAll"); // accept requests from different domains
 
             app.UseAuthentication();
             app.UseAuthorization();

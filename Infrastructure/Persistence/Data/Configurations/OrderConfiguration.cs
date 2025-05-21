@@ -14,9 +14,16 @@ namespace Persistence.Data.Configurations
         public void Configure(EntityTypeBuilder<Order> builder)
         {
             builder.ToTable("Orders");
-            builder.Property(d => d.SubTotal).HasColumnType("decimal(8,2)");
-            builder.HasMany(o => o.Items).WithOne();
-            builder.OwnsOne(o => o.Address).WithOwner(); //include the address in the order table
+
+            builder.Property(d => d.SubTotal)
+                   .HasColumnType("decimal(8,2)");
+
+            builder.HasMany(o => o.Items)
+                   .WithOne()
+                   .OnDelete(DeleteBehavior.Cascade); // when delete order delete its items
+
+            builder.OwnsOne(o => o.Address)
+                   .WithOwner(); //include the address in the order table
         }
     }
 }
