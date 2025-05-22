@@ -19,18 +19,19 @@ namespace Domain.Models.Orders
         {
             
         }
-        public Order(List<OrderItems> items, OrderAddress address, decimal subTotal, string email, DeliveryMethod method)
+        public Order(List<OrderItems> items, OrderAddress address, decimal subTotal, string email, DeliveryMethod method, string paymentIntentId)
         {
             Items = items;
             Address = address;
             SubTotal = subTotal;
             UserEmail = email;
             DeliveryMethod = method;
+            PaymentIntentId = paymentIntentId;
         }
         public string UserEmail { get; set; }
         public List<OrderItems> Items { get; set; } = [];
         public OrderAddress Address { get; set; }
-        public string PaymentIntentId { get; set; } = string.Empty;
+        public string PaymentIntentId { get; set; } 
         public decimal SubTotal { get; set; } // total price of the order without shiping price
         public DateTimeOffset Date { get; set; } = DateTimeOffset.Now;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
